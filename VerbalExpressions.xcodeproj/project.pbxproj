@@ -10,6 +10,7 @@
 		5DF0B9F6193E827500CC5CE2 /* VerbalExpressions.h in Headers */ = {isa = PBXBuildFile; fileRef = 5DF0B9F5193E827500CC5CE2 /* VerbalExpressions.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		5DF0B9FC193E827500CC5CE2 /* VerbalExpressions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DF0B9F0193E827500CC5CE2 /* VerbalExpressions.framework */; };
 		5DF0BA03193E827500CC5CE2 /* VerbalExpressionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF0BA02193E827500CC5CE2 /* VerbalExpressionsTests.swift */; };
+		5DF0BA0D193E82AA00CC5CE2 /* VerbalExpressions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF0BA0C193E82AA00CC5CE2 /* VerbalExpressions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -29,6 +30,7 @@
 		5DF0B9FB193E827500CC5CE2 /* VerbalExpressionsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VerbalExpressionsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5DF0BA01193E827500CC5CE2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5DF0BA02193E827500CC5CE2 /* VerbalExpressionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerbalExpressionsTests.swift; sourceTree = "<group>"; };
+		5DF0BA0C193E82AA00CC5CE2 /* VerbalExpressions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VerbalExpressions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,6 +74,7 @@
 			isa = PBXGroup;
 			children = (
 				5DF0B9F5193E827500CC5CE2 /* VerbalExpressions.h */,
+				5DF0BA0C193E82AA00CC5CE2 /* VerbalExpressions.swift */,
 				5DF0B9F3193E827500CC5CE2 /* Supporting Files */,
 			);
 			path = VerbalExpressions;
@@ -210,6 +213,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5DF0BA0D193E82AA00CC5CE2 /* VerbalExpressions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -320,6 +324,7 @@
 		5DF0BA07193E827500CC5CE2 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -329,12 +334,14 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
 		5DF0BA08193E827500CC5CE2 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -398,6 +405,7 @@
 				5DF0BA08193E827500CC5CE2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		5DF0BA09193E827500CC5CE2 /* Build configuration list for PBXNativeTarget "VerbalExpressionsTests" */ = {
 			isa = XCConfigurationList;
@@ -406,6 +414,7 @@
 				5DF0BA0B193E827500CC5CE2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

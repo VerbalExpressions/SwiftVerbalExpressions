@@ -7,6 +7,7 @@
 //
 
 import XCTest
+import VerbalExpressions
 
 class VerbalExpressionsTests: XCTestCase {
     
@@ -20,16 +21,49 @@ class VerbalExpressionsTests: XCTestCase {
         super.tearDown()
     }
     
-    func testExample() {
-        // This is an example of a functional test case.
-        XCTAssert(true, "Pass")
+    func testStartOfLine() {
+        let tester = VerEx()
+            .startOfLine()
+            .then("h")
+        
+        XCTAssert(tester.test("hello"), "starts with h")
+        XCTAssert(!tester.test("bonjour"), "doesn't start with h")
     }
     
-    func testPerformanceExample() {
-        // This is an example of a performance test case.
-        self.measureBlock() {
-            // Put the code you want to measure the time of here.
-        }
+    func testEndOfLine() {
+        let tester = VerEx()
+            .then("o")
+            .endOfLine()
+        
+        XCTAssert(tester.test("hello"), "ends with o")
+        XCTAssert(!tester.test("bonjour"), "doesn't end with r")
+    }
+    
+    func testThen() {
+        let tester = VerEx().then("hello")
+        
+        XCTAssertEqual(tester.pattern, "(?:hello)", "builds pattern correctly")
+        XCTAssert(tester.test("hello"), "matches string")
+        XCTAssert(tester.test("hallo, hello, bonjour"), "matches part of string")
+    }
+    
+    func testURLExample() {
+        let tester = VerEx()
+            .startOfLine()
+            .then("http")
+            .maybe("s")
+            .then("://")
+            .maybe("www.")
+            .anythingBut(" ")
+            .endOfLine()
+        
+        XCTAssert(tester.test("http://www.google.com"), "matches HTTP URL")
+        XCTAssert(tester.test("https://www.google.com"), "matches HTTPS URL")
+        XCTAssert(tester.test("http://google.com"), "matches HTTP URL without www. part")
+        XCTAssert(tester.test("https://google.com"), "matches HTTPS URL without www. part")
+        XCTAssert(tester.test("https://github.com/nubbel/SwiftVerbalExpressions"), "matches invalid URL with path")
+        XCTAssert(!tester.test("ws://google.com"), "doesn't match WebSocket URL")
+        XCTAssert(!tester.test("http://goo gle.com"), "doesn't match invalid URL")
     }
     
 }
