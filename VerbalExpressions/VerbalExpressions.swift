@@ -15,121 +15,120 @@ func VerEx(options: NSRegularExpressionOptions = nil) -> VerbalExpressions {
 class VerbalExpressions {
     // stored properties
     var pattern: String = ""
-    var options: NSRegularExpressionOptions!
-    
+    var options: NSRegularExpressionOptions = nil
+
     // computed properties
     var regex: NSRegularExpression {
     return NSRegularExpression(pattern: pattern, options: options, error: nil)
     }
-    
+
     // class methods
-    class func escape(str: String) -> String {
-        return NSRegularExpression.escapedPatternForString(str)
+    class func escape(string: String) -> String {
+        return NSRegularExpression.escapedPatternForString(string)
     }
-    
-    
+
+
     // initializers
     init(options: NSRegularExpressionOptions = nil) {
         self.options = options
     }
-    
-    
+
+
     // instance methods
     func startOfLine() -> Self {
         pattern += "^"
-        
+
         return self
     }
-    
+
     func endOfLine() -> Self {
         pattern += "$"
-        
+
         return self
     }
-    
-    func then(str: String) -> Self {
-        pattern += "(?:\(VerbalExpressions.escape(str)))"
-        
+
+    func then(string: String) -> Self {
+        pattern += "(?:\(VerbalExpressions.escape(string)))"
+
         return self
     }
-    
+
     // alias for then
-    func find(str: String) -> Self {
-        return self.then(str)
+    func find(string: String) -> Self {
+        return then(string)
     }
-    
-    func maybe(str: String) -> Self {
-        pattern += "(?:\(VerbalExpressions.escape(str)))?"
-        
+
+    func maybe(string: String) -> Self {
+        pattern += "(?:\(VerbalExpressions.escape(string)))?"
+
         return self
     }
-    
+
     func something() -> Self {
         pattern += "(?:.+)"
-        
+
         return self
     }
-    
-    func somethingBut(str: String) -> Self {
-        pattern += "(?:[^\(VerbalExpressions.escape(str))]+)"
-        
+
+    func somethingBut(string: String) -> Self {
+        pattern += "(?:[^\(VerbalExpressions.escape(string))]+)"
+
         return self
     }
-    
+
     func anything() -> Self {
         pattern += "(?:.*)"
-        
+
         return self
     }
-    
-    func anythingBut(str: String) -> Self {
-        pattern += "(?:[^\(VerbalExpressions.escape(str))]*)"
-        
+
+    func anythingBut(string: String) -> Self {
+        pattern += "(?:[^\(VerbalExpressions.escape(string))]*)"
+
         return self
     }
-    
-    func anyOf(str: String) -> Self {
-        pattern += "(?:[\(VerbalExpressions.escape(str))])"
-        
+
+    func anyOf(string: String) -> Self {
+        pattern += "(?:[\(VerbalExpressions.escape(string))])"
+
         return self
     }
-    
-    func any(str: String) -> Self {
-        return self.anyOf(str)
+
+    func any(string: String) -> Self {
+        return anyOf(string)
     }
-    
+
     func linebreak() -> Self {
         pattern += "(?:(?:\n)|(?:\r\n))"
-        
+
         return self
     }
-    
+
     // alias for linebreak
     func br() -> Self {
-        return self.linebreak()
+        return linebreak()
     }
-    
+
     func tab() -> Self {
         pattern += "\t"
-        
+
         return self
     }
-    
+
     func word() -> Self {
         pattern += "\\w+"
-        
+
         return self
     }
-    
-    func test(str: String, options: NSMatchingOptions = nil) -> Bool {
-        let range = NSRange(location: 0, length: countElements(str))
-        let result = self.regex.firstMatchInString(str, options: options, range: range)
+
+    func test(string: String, options: NSMatchingOptions = nil) -> Bool {
+        let range = NSRange(location: 0, length: countElements(string))
         
-        if result {
+        if let result = regex.firstMatchInString(string, options: options, range: range) {
             return result.range.location != NSNotFound
         }
-        
+
         return false
     }
-    
+
 }
