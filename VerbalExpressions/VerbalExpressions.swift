@@ -8,49 +8,49 @@
 
 import Foundation
 
-func VerEx(options: NSRegularExpressionOptions = nil) -> VerbalExpressions {
-    return VerbalExpressions(options: options)
+func VerEx() -> VerbalExpressions {
+    return VerbalExpressions()
 }
 
 class VerbalExpressions {
     // stored properties
-    var pattern: String = ""
-    var options: NSRegularExpressionOptions = nil
+    var prefixes = ""
+    var source = ""
+    var suffixes = ""
+    var options: NSRegularExpressionOptions = NSRegularExpressionOptions.AnchorsMatchLines
 
     // computed properties
-    var regex: NSRegularExpression {
-    return NSRegularExpression(pattern: pattern, options: options, error: nil)
+    var pattern: String { return prefixes + source + suffixes }
+    
+    var regularExpression: NSRegularExpression! {
+    get {
+        var error: NSError?
+        
+        let regex = NSRegularExpression(pattern: pattern, options: options, error: &error)
+        
+        if error {
+            return nil
+        }
+        
+        return regex
     }
-
-    // class methods
-    class func escape(string: String) -> String {
-        return NSRegularExpression.escapedPatternForString(string)
     }
-
-
-    // initializers
-    init(options: NSRegularExpressionOptions = nil) {
-        self.options = options
-    }
-
 
     // instance methods
-    func startOfLine() -> Self {
-        pattern += "^"
+    func startOfLine(enabled: Bool = true) -> Self {
+        prefixes = enabled ? "^" : ""
 
         return self
     }
 
-    func endOfLine() -> Self {
-        pattern += "$"
+    func endOfLine(enabled: Bool = true) -> Self {
+        suffixes = enabled ? "$" : ""
 
         return self
     }
 
     func then(string: String) -> Self {
-        pattern += "(?:\(VerbalExpressions.escape(string)))"
-
-        return self
+        return add("(?:\(sanitize(string)))")
     }
 
     // alias for then
@@ -59,76 +59,158 @@ class VerbalExpressions {
     }
 
     func maybe(string: String) -> Self {
-        pattern += "(?:\(VerbalExpressions.escape(string)))?"
-
-        return self
+        return add("(?:\(sanitize(string)))?")
+    }
+    
+    func anything() -> Self {
+        return add("(?:.*)")
+    }
+    
+    func anythingBut(string: String) -> Self {
+        return add("(?:[^\(sanitize(string))]*)")
     }
 
     func something() -> Self {
-        pattern += "(?:.+)"
-
-        return self
+        return add("(?:.+)")
     }
 
     func somethingBut(string: String) -> Self {
-        pattern += "(?:[^\(VerbalExpressions.escape(string))]+)"
-
-        return self
+        return add("(?:[^\(sanitize(string))]+)")
     }
 
-    func anything() -> Self {
-        pattern += "(?:.*)"
-
-        return self
+    func lineBreak() -> Self {
+        return add("(?:(?:\n)|(?:\r\n))")
     }
 
-    func anythingBut(string: String) -> Self {
-        pattern += "(?:[^\(VerbalExpressions.escape(string))]*)"
-
-        return self
+    // alias for lineBreak
+    func br() -> Self {
+        return lineBreak()
     }
 
+    func tab() -> Self {
+        return add("\t")
+    }
+
+    func word() -> Self {
+        return add("\\w+")
+    }
+    
     func anyOf(string: String) -> Self {
-        pattern += "(?:[\(VerbalExpressions.escape(string))])"
-
-        return self
+        return add("(?:[\(sanitize(string))])")
     }
-
+    
+    // alias for anyOf
     func any(string: String) -> Self {
         return anyOf(string)
     }
 
-    func linebreak() -> Self {
-        pattern += "(?:(?:\n)|(?:\r\n))"
-
-        return self
+    func withAnyCase(enabled: Bool = true) -> Self {
+        if enabled {
+            return addModifier("i")
+        }
+        else {
+            return removeModifier("i")
+        }
     }
-
-    // alias for linebreak
-    func br() -> Self {
-        return linebreak()
+    
+    func searchOneLine(enabled: Bool = true) -> Self {
+        if enabled {
+            return removeModifier("m")
+        }
+        else {
+            return addModifier("m")
+        }
     }
-
-    func tab() -> Self {
-        pattern += "\t"
-
-        return self
+    
+    func beginCapture() -> Self {
+        suffixes += ")"
+        
+        return add("(")
     }
-
-    func word() -> Self {
-        pattern += "\\w+"
-
-        return self
+    
+    func endCapture() -> Self {
+        suffixes = suffixes.substringToIndex(countElements(suffixes) - 1)
+        
+        return add(")")
     }
-
-    func test(string: String, options: NSMatchingOptions = nil) -> Bool {
+    
+    func replace(string: String, template: String) -> String {
         let range = NSRange(location: 0, length: countElements(string))
         
-        if let result = regex.firstMatchInString(string, options: options, range: range) {
+        return regularExpression.stringByReplacingMatchesInString(string, options: nil, range: range, withTemplate: template)
+    }
+    
+    func replace(string: String, with: String) -> String {
+        let range = NSRange(location: 0, length: countElements(string))
+        let template = NSRegularExpression.escapedTemplateForString(with)
+        
+        return regularExpression.stringByReplacingMatchesInString(string, options: nil, range: range, withTemplate: template)
+    }
+    
+    func test(string: String) -> Bool {
+        let range = NSRange(location: 0, length: countElements(string))
+        
+        if let result = regularExpression.firstMatchInString(string, options: nil, range: range) {
             return result.range.location != NSNotFound
         }
 
         return false
     }
+    
+    
+    // internal methods
+    
+    func sanitize(string: String) -> String {
+        return NSRegularExpression.escapedPatternForString(string)
+    }
+    
+    func add(string: String) -> Self {
+        source += string
+        
+        return self
+    }
+    
+    func addModifier(modifier: Character) -> Self {
+        if let option = option(forModifier: modifier) {
+            options = options | option
+        }
+        
+        return self
+    }
+    
+    
+    func removeModifier(modifier: Character) -> Self {
+        if let option = option(forModifier: modifier) {
+            options = options & ~option
+        }
+        
+        return self
+    }
+    
+    func option(forModifier modifier: Character) -> NSRegularExpressionOptions? {
+        switch modifier {
+        case "d": // UREGEX_UNIX_LINES
+            return NSRegularExpressionOptions.UseUnixLineSeparators
+        case "i": // UREGEX_CASE_INSENSITIVE
+            return NSRegularExpressionOptions.CaseInsensitive
+        case "x": // UREGEX_COMMENTS
+            return NSRegularExpressionOptions.AllowCommentsAndWhitespace
+        case "m": // UREGEX_MULTILINE
+            return NSRegularExpressionOptions.AnchorsMatchLines
+        case "s": // UREGEX_DOTALL
+            return NSRegularExpressionOptions.DotMatchesLineSeparators
+        case "u": // UREGEX_UWORD
+            return NSRegularExpressionOptions.UseUnicodeWordBoundaries
+        case "U": // UREGEX_LITERAL
+            return NSRegularExpressionOptions.IgnoreMetacharacters
+        default:
+            fatalError("Unknown modifier")
+            return nil
+        }
+    }
 
+}
+
+extension VerbalExpressions: Printable {
+    var description: String { return pattern }
 }
