@@ -35,6 +35,14 @@ else {
     println("The URL is incorrect")
 }
 
+// Use =~ operator
+if testMe =~ tester {
+    println("We have a correct URL") // This output will fire
+}
+else {
+    println("The URL is incorrect")
+}
+
 println(tester) // Outputs the actual expression used: "^(?:http)(?:s)?(?::\/\/)(?:www)?(?:[^ ]*)$"
 ```
 

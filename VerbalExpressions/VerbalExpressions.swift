@@ -214,3 +214,17 @@ class VerbalExpressions {
 extension VerbalExpressions: Printable {
     var description: String { return pattern }
 }
+
+
+// Match operators
+// Adapted from https://gist.github.com/JimRoepcke/d68dd41ee2fedc6a0c67
+operator infix =~  { associativity left precedence 140 }
+operator infix !=~ { associativity left precedence 140 }
+
+func =~(lhs: String, rhs: VerbalExpressions) -> Bool {
+    return rhs.test(lhs)
+}
+
+func !=~(lhs: String, rhs: VerbalExpressions) -> Bool {
+    return !(lhs =~ rhs)
+}

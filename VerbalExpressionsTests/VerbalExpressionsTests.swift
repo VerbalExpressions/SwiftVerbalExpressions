@@ -239,4 +239,14 @@ class VerbalExpressionsTests: XCTestCase {
         XCTAssert(!tester.test("http://goo gle.com"), "doesn't match invalid URL")
     }
     
+    
+    func testMatchOperators() {
+        let tester = VerEx()
+            .startOfLine()
+            .then("a")
+        
+        XCTAssert("a"   =~ tester, "starts with an a")
+        XCTAssert("ba" !=~ tester, "doesn't start with an a")
+    }
+    
 }
