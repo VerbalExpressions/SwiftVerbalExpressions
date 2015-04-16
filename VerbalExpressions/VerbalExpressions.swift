@@ -8,16 +8,16 @@
 
 import Foundation
 
-func VerEx() -> VerbalExpressions {
+public func VerEx() -> VerbalExpressions {
     return VerbalExpressions()
 }
 
-class VerbalExpressions {
+public class VerbalExpressions {
     // stored properties
     var prefixes = ""
     var source = ""
     var suffixes = ""
-    var options: NSRegularExpressionOptions = NSRegularExpressionOptions.AnchorsMatchLines
+    var options: NSRegularExpressionOptions = .AnchorsMatchLines
 
     // computed properties
     var pattern: String { return prefixes + source + suffixes }
@@ -28,7 +28,7 @@ class VerbalExpressions {
         
         let regex = NSRegularExpression(pattern: pattern, options: options, error: &error)
         
-        if error {
+        if (error != nil) {
             return nil
         }
         
@@ -37,74 +37,74 @@ class VerbalExpressions {
     }
 
     // instance methods
-    func startOfLine(enabled: Bool = true) -> Self {
+    public func startOfLine(enabled: Bool = true) -> Self {
         prefixes = enabled ? "^" : ""
 
         return self
     }
 
-    func endOfLine(enabled: Bool = true) -> Self {
+    public func endOfLine(enabled: Bool = true) -> Self {
         suffixes = enabled ? "$" : ""
 
         return self
     }
 
-    func then(string: String) -> Self {
+    public func then(string: String) -> Self {
         return add("(?:\(sanitize(string)))")
     }
 
     // alias for then
-    func find(string: String) -> Self {
+    public func find(string: String) -> Self {
         return then(string)
     }
 
-    func maybe(string: String) -> Self {
+    public func maybe(string: String) -> Self {
         return add("(?:\(sanitize(string)))?")
     }
     
-    func anything() -> Self {
+    public func anything() -> Self {
         return add("(?:.*)")
     }
     
-    func anythingBut(string: String) -> Self {
+    public func anythingBut(string: String) -> Self {
         return add("(?:[^\(sanitize(string))]*)")
     }
 
-    func something() -> Self {
+    public func something() -> Self {
         return add("(?:.+)")
     }
 
-    func somethingBut(string: String) -> Self {
+    public func somethingBut(string: String) -> Self {
         return add("(?:[^\(sanitize(string))]+)")
     }
 
-    func lineBreak() -> Self {
+    public func lineBreak() -> Self {
         return add("(?:(?:\n)|(?:\r\n))")
     }
 
     // alias for lineBreak
-    func br() -> Self {
+    public func br() -> Self {
         return lineBreak()
     }
 
-    func tab() -> Self {
+    public func tab() -> Self {
         return add("\t")
     }
 
-    func word() -> Self {
+    public func word() -> Self {
         return add("\\w+")
     }
     
-    func anyOf(string: String) -> Self {
+    public func anyOf(string: String) -> Self {
         return add("(?:[\(sanitize(string))])")
     }
     
     // alias for anyOf
-    func any(string: String) -> Self {
+    public func any(string: String) -> Self {
         return anyOf(string)
     }
 
-    func withAnyCase(enabled: Bool = true) -> Self {
+    public func withAnyCase(enabled: Bool = true) -> Self {
         if enabled {
             return addModifier("i")
         }
@@ -113,7 +113,7 @@ class VerbalExpressions {
         }
     }
     
-    func searchOneLine(enabled: Bool = true) -> Self {
+    public func searchOneLine(enabled: Bool = true) -> Self {
         if enabled {
             return removeModifier("m")
         }
@@ -122,33 +122,33 @@ class VerbalExpressions {
         }
     }
     
-    func beginCapture() -> Self {
+    public func beginCapture() -> Self {
         suffixes += ")"
         
         return add("(")
     }
     
-    func endCapture() -> Self {
-        suffixes = suffixes.substringToIndex(countElements(suffixes) - 1)
+    public func endCapture() -> Self {
+        suffixes = suffixes[suffixes.startIndex..<suffixes.endIndex.predecessor()]
         
         return add(")")
     }
     
-    func replace(string: String, template: String) -> String {
-        let range = NSRange(location: 0, length: countElements(string))
+    public func replace(string: String, template: String) -> String {
+        let range = NSRange(location: 0, length: count(string))
         
         return regularExpression.stringByReplacingMatchesInString(string, options: nil, range: range, withTemplate: template)
     }
     
-    func replace(string: String, with: String) -> String {
-        let range = NSRange(location: 0, length: countElements(string))
+    public func replace(string: String, with: String) -> String {
+        let range = NSRange(location: 0, length: count(string))
         let template = NSRegularExpression.escapedTemplateForString(with)
         
         return regularExpression.stringByReplacingMatchesInString(string, options: nil, range: range, withTemplate: template)
     }
     
-    func test(string: String) -> Bool {
-        let range = NSRange(location: 0, length: countElements(string))
+    public func test(string: String) -> Bool {
+        let range = NSRange(location: 0, length: count(string))
         
         if let result = regularExpression.firstMatchInString(string, options: nil, range: range) {
             return result.range.location != NSNotFound
@@ -190,41 +190,40 @@ class VerbalExpressions {
     func option(forModifier modifier: Character) -> NSRegularExpressionOptions? {
         switch modifier {
         case "d": // UREGEX_UNIX_LINES
-            return NSRegularExpressionOptions.UseUnixLineSeparators
+            return .UseUnixLineSeparators
         case "i": // UREGEX_CASE_INSENSITIVE
-            return NSRegularExpressionOptions.CaseInsensitive
+            return .CaseInsensitive
         case "x": // UREGEX_COMMENTS
-            return NSRegularExpressionOptions.AllowCommentsAndWhitespace
+            return .AllowCommentsAndWhitespace
         case "m": // UREGEX_MULTILINE
-            return NSRegularExpressionOptions.AnchorsMatchLines
+            return .AnchorsMatchLines
         case "s": // UREGEX_DOTALL
-            return NSRegularExpressionOptions.DotMatchesLineSeparators
+            return .DotMatchesLineSeparators
         case "u": // UREGEX_UWORD
-            return NSRegularExpressionOptions.UseUnicodeWordBoundaries
+            return .UseUnicodeWordBoundaries
         case "U": // UREGEX_LITERAL
-            return NSRegularExpressionOptions.IgnoreMetacharacters
+            return .IgnoreMetacharacters
         default:
             fatalError("Unknown modifier")
-            return nil
         }
     }
 
 }
 
 extension VerbalExpressions: Printable {
-    var description: String { return pattern }
+    public var description: String { return pattern }
 }
 
 
 // Match operators
 // Adapted from https://gist.github.com/JimRoepcke/d68dd41ee2fedc6a0c67
-operator infix =~  { associativity left precedence 140 }
-operator infix !=~ { associativity left precedence 140 }
+infix operator =~  { associativity left precedence 140 }
+infix operator !=~ { associativity left precedence 140 }
 
-func =~(lhs: String, rhs: VerbalExpressions) -> Bool {
+public func =~(lhs: String, rhs: VerbalExpressions) -> Bool {
     return rhs.test(lhs)
 }
 
-func !=~(lhs: String, rhs: VerbalExpressions) -> Bool {
+public func !=~(lhs: String, rhs: VerbalExpressions) -> Bool {
     return !(lhs =~ rhs)
 }
