@@ -135,20 +135,20 @@ public class VerbalExpressions {
     }
     
     public func replace(string: String, template: String) -> String {
-        let range = NSRange(location: 0, length: count(string))
+        let range = NSRange(location: 0, length: count(string.utf16))
         
         return regularExpression.stringByReplacingMatchesInString(string, options: nil, range: range, withTemplate: template)
     }
     
     public func replace(string: String, with: String) -> String {
-        let range = NSRange(location: 0, length: count(string))
+        let range = NSRange(location: 0, length: count(string.utf16))
         let template = NSRegularExpression.escapedTemplateForString(with)
         
         return regularExpression.stringByReplacingMatchesInString(string, options: nil, range: range, withTemplate: template)
     }
     
     public func test(string: String) -> Bool {
-        let range = NSRange(location: 0, length: count(string))
+        let range = NSRange(location: 0, length: count(string.utf16))
         
         if let result = regularExpression.firstMatchInString(string, options: nil, range: range) {
             return result.range.location != NSNotFound
