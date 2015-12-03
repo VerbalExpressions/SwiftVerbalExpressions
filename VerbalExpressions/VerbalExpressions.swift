@@ -23,27 +23,21 @@ public class VerbalExpressions {
     var pattern: String { return prefixes + source + suffixes }
     
     var regularExpression: NSRegularExpression! {
-    get {
-        var error: NSError?
-        
-        let regex = NSRegularExpression(pattern: pattern, options: options, error: &error)
-        
-        if (error != nil) {
-            return nil
+        get {
+            let regex = try! NSRegularExpression(pattern: pattern, options: options)
+            
+            return regex
         }
-        
-        return regex
-    }
     }
 
     // instance methods
-    public func startOfLine(enabled: Bool = true) -> Self {
+    public func startOfLine(enabled enabled: Bool = true) -> Self {
         prefixes = enabled ? "^" : ""
 
         return self
     }
 
-    public func endOfLine(enabled: Bool = true) -> Self {
+    public func endOfLine(enabled enabled: Bool = true) -> Self {
         suffixes = enabled ? "$" : ""
 
         return self
@@ -104,7 +98,7 @@ public class VerbalExpressions {
         return anyOf(string)
     }
 
-    public func withAnyCase(enabled: Bool = true) -> Self {
+    public func withAnyCase(enabled enabled: Bool = true) -> Self {
         if enabled {
             return addModifier("i")
         }
@@ -113,7 +107,7 @@ public class VerbalExpressions {
         }
     }
     
-    public func searchOneLine(enabled: Bool = true) -> Self {
+    public func searchOneLine(enabled enabled: Bool = true) -> Self {
         if enabled {
             return removeModifier("m")
         }
@@ -135,25 +129,25 @@ public class VerbalExpressions {
     }
     
     public func replace(string: String, template: String) -> String {
-        let range = NSRange(location: 0, length: count(string.utf16))
+        let range = NSRange(location: 0, length: string.utf16.count)
         
-        return regularExpression.stringByReplacingMatchesInString(string, options: nil, range: range, withTemplate: template)
+        return regularExpression.stringByReplacingMatchesInString(string, options: [], range: range, withTemplate: template)
     }
     
     public func replace(string: String, with: String) -> String {
-        let range = NSRange(location: 0, length: count(string.utf16))
+        let range = NSRange(location: 0, length: string.utf16.count)
         let template = NSRegularExpression.escapedTemplateForString(with)
         
-        return regularExpression.stringByReplacingMatchesInString(string, options: nil, range: range, withTemplate: template)
+        return regularExpression.stringByReplacingMatchesInString(string, options: [], range: range, withTemplate: template)
     }
     
     public func test(string: String) -> Bool {
-        let range = NSRange(location: 0, length: count(string.utf16))
+        let range = NSRange(location: 0, length: string.utf16.count)
         
-        if let result = regularExpression.firstMatchInString(string, options: nil, range: range) {
+        if let result = regularExpression.firstMatchInString(string, options: [], range: range) {
             return result.range.location != NSNotFound
         }
-
+        
         return false
     }
     
@@ -172,7 +166,7 @@ public class VerbalExpressions {
     
     func addModifier(modifier: Character) -> Self {
         if let option = option(forModifier: modifier) {
-            options = options | option
+            options.insert(option)
         }
         
         return self
@@ -180,8 +174,8 @@ public class VerbalExpressions {
     
     
     func removeModifier(modifier: Character) -> Self {
-        if let option = option(forModifier: modifier) {
-            options = options & ~option
+        if let option = option(forModifier: modifier) where options.contains(option) {
+            options.remove(option)
         }
         
         return self
@@ -210,7 +204,7 @@ public class VerbalExpressions {
 
 }
 
-extension VerbalExpressions: Printable {
+extension VerbalExpressions: CustomStringConvertible {
     public var description: String { return pattern }
 }
 
