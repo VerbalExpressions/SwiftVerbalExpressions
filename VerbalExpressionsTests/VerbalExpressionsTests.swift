@@ -12,27 +12,27 @@ import VerbalExpressions
 class VerbalExpressionsTests: XCTestCase {
     
     func testStartOfLine() {
-        let tester = VerEx()
+        var tester = VerEx()
             .startOfLine()
             .then("a")
         
         XCTAssert(tester.test("a"),   "starts with an a")
         XCTAssert(!tester.test("ba"), "doesn't start with an a")
         
-        tester.startOfLine(enabled: false)
+        tester = tester.startOfLine(enabled: false)
         XCTAssert(tester.test("ba"), "contains an a")
         XCTAssert(!tester.test("b"), "doesn't contain an a")
     }
     
     func testEndOfLine() {
-        let tester = VerEx()
+        var tester = VerEx()
             .find("a")
             .endOfLine()
         
         XCTAssert(tester.test("a"),   "ends with an a")
         XCTAssert(!tester.test("ab"), "doesn't end with an a")
         
-        tester.endOfLine(enabled: false)
+        tester = tester.endOfLine(enabled: false)
         XCTAssert(tester.test("ab"), "contains an a")
         XCTAssert(!tester.test("b"), "doesn't contain an a")
     }
@@ -168,18 +168,18 @@ class VerbalExpressionsTests: XCTestCase {
     }
     
     func testWithAnyCase() {
-        let tester = VerEx()
+        var tester = VerEx()
             .startOfLine()
             .then("a")
         
         XCTAssert(tester.test("a"),  "tests case sensitive by default")
         XCTAssert(!tester.test("A"), "tests case sensitive by default")
         
-        tester.withAnyCase()
+        tester = tester.withAnyCase()
         XCTAssert(tester.test("a"),  "tests case insensitive")
         XCTAssert(tester.test("A"),  "tests case insensitive")
         
-        tester.withAnyCase(enabled: false)
+        tester = tester.withAnyCase(enabled: false)
         XCTAssert(tester.test("a"),  "tests case insensitive")
         XCTAssert(!tester.test("A"), "tests case insensitive")
     }
