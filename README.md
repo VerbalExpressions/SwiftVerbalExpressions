@@ -1,6 +1,7 @@
 SwiftVerbalExpressions
 ======================
 
+[![Build Status](https://travis-ci.org/VerbalExpressions/SwiftVerbalExpressions.svg)](https://travis-ci.org/VerbalExpressions/SwiftVerbalExpressions)
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
 
 ## Swift Regular Expressions made easy
