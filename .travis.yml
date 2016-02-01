@@ -1,0 +1,16 @@
+language: objective-c
+
+osx_image: xcode7.2
+
+sudo: false # Enable container-based builds
+
+install: gem install scan
+
+script: scan
+
+branches:
+  only: # whitelist
+    - master
+
+notifications:
+  email: false
