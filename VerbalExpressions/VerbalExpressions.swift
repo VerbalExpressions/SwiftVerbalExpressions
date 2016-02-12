@@ -255,7 +255,7 @@ extension VerbalExpressions: CustomStringConvertible {
 // Match operators
 // Adapted from https://gist.github.com/JimRoepcke/d68dd41ee2fedc6a0c67
 infix operator =~  { associativity left precedence 140 }
-infix operator !=~ { associativity left precedence 140 }
+infix operator !~ { associativity left precedence 140 }
 
 public func =~(lhs: String, rhs: VerbalExpressions) -> Bool {
     return rhs.test(lhs)
@@ -265,10 +265,10 @@ public func =~(lhs: VerbalExpressions, rhs: String) -> Bool {
     return lhs.test(rhs)
 }
 
-public func !=~(lhs: String, rhs: VerbalExpressions) -> Bool {
+public func !~(lhs: String, rhs: VerbalExpressions) -> Bool {
     return !(lhs =~ rhs)
 }
 
-public func !=~(lhs: VerbalExpressions, rhs: String) -> Bool {
+public func !~(lhs: VerbalExpressions, rhs: String) -> Bool {
     return !(lhs =~ rhs)
 }
