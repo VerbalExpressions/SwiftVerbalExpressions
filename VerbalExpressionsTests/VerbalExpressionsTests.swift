@@ -245,8 +245,8 @@ class VerbalExpressionsTests: XCTestCase {
             .startOfLine()
             .then("a")
         
-        XCTAssert("a"   =~ tester, "starts with an a")
-        XCTAssert("ba" !=~ tester, "doesn't start with an a")
+        XCTAssert("a"  =~ tester, "starts with an a")
+        XCTAssert("ba" !~ tester, "doesn't start with an a")
     }
     
 }
