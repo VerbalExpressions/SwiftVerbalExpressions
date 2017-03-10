@@ -17,7 +17,7 @@ public struct VerbalExpressions {
     var prefixes = ""
     var source = ""
     var suffixes = ""
-    var options: NSRegularExpressionOptions = .AnchorsMatchLines
+    var options: NSRegularExpression.Options = .anchorsMatchLines
 
     // computed properties
     var pattern: String { return prefixes + source + suffixes }
@@ -26,7 +26,7 @@ public struct VerbalExpressions {
         return try! NSRegularExpression(pattern: pattern, options: options)
     }
     
-    func set(prefixes prefixes: String? = nil, source: String? = nil, suffixes: String? = nil, options: NSRegularExpressionOptions? = nil) -> VerbalExpressions {
+    func set(prefixes: String? = nil, source: String? = nil, suffixes: String? = nil, options: NSRegularExpression.Options? = nil) -> VerbalExpressions {
         return VerbalExpressions(
             prefixes: prefixes ?? self.prefixes,
             source: source ?? self.source,
@@ -36,35 +36,35 @@ public struct VerbalExpressions {
     }
 
     // instance methods
-    public func startOfLine(enabled enabled: Bool = true) -> VerbalExpressions {
+    public func startOfLine(enabled: Bool = true) -> VerbalExpressions {
         return set(prefixes: enabled ? "^" : "")
     }
 
-    public func endOfLine(enabled enabled: Bool = true) -> VerbalExpressions {
+    public func endOfLine(enabled: Bool = true) -> VerbalExpressions {
         return set(suffixes: enabled ? "$" : "")    }
 
-    public func then(string: String) -> VerbalExpressions {
+    public func then(_ string: String) -> VerbalExpressions {
         return add("(?:\(sanitize(string)))")
     }
 
-    public func then(string: VerbalExpressions) -> VerbalExpressions {
+    public func then(_ string: VerbalExpressions) -> VerbalExpressions {
         return add("(?:\(sanitize(string.source)))")
     }
 
     // alias for then
-    public func find(string: String) -> VerbalExpressions {
+    public func find(_ string: String) -> VerbalExpressions {
         return then(string)
     }
 
-    public func find(string: VerbalExpressions) -> VerbalExpressions {
+    public func find(_ string: VerbalExpressions) -> VerbalExpressions {
         return then(string)
     }
 
-    public func maybe(string: String) -> VerbalExpressions {
+    public func maybe(_ string: String) -> VerbalExpressions {
         return add("(?:\(sanitize(string)))?")
     }
 
-    public func maybe(string: VerbalExpressions) -> VerbalExpressions {
+    public func maybe(_ string: VerbalExpressions) -> VerbalExpressions {
         return add("(?:\(sanitize(string.source)))?")
     }
 
@@ -74,11 +74,11 @@ public struct VerbalExpressions {
             .add(")|(?:")
     }
 
-    public func or(value: String) -> VerbalExpressions {
+    public func or(_ value: String) -> VerbalExpressions {
         return or().then(value)
     }
 
-    public func or(value: VerbalExpressions) -> VerbalExpressions {
+    public func or(_ value: VerbalExpressions) -> VerbalExpressions {
         return or(value.source);
     }
 
@@ -86,11 +86,11 @@ public struct VerbalExpressions {
         return add("(?:.*)")
     }
 
-    public func anythingBut(string: String) -> VerbalExpressions {
+    public func anythingBut(_ string: String) -> VerbalExpressions {
         return add("(?:[^\(sanitize(string))]*)")
     }
 
-    public func anythingBut(string: VerbalExpressions) -> VerbalExpressions {
+    public func anythingBut(_ string: VerbalExpressions) -> VerbalExpressions {
         return add("(?:[^\(sanitize(string.source))]*)")
     }
 
@@ -98,11 +98,11 @@ public struct VerbalExpressions {
         return add("(?:.+)")
     }
 
-    public func somethingBut(string: String) -> VerbalExpressions {
+    public func somethingBut(_ string: String) -> VerbalExpressions {
         return add("(?:[^\(sanitize(string))]+)")
     }
 
-    public func somethingBut(string: VerbalExpressions) -> VerbalExpressions {
+    public func somethingBut(_ string: VerbalExpressions) -> VerbalExpressions {
         return add("(?:[^\(sanitize(string.source))]+)")
     }
 
@@ -123,24 +123,24 @@ public struct VerbalExpressions {
         return add("\\w+")
     }
 
-    public func anyOf(string: String) -> VerbalExpressions {
+    public func anyOf(_ string: String) -> VerbalExpressions {
         return add("(?:[\(sanitize(string))])")
     }
 
-    public func anyOf(string: VerbalExpressions) -> VerbalExpressions {
+    public func anyOf(_ string: VerbalExpressions) -> VerbalExpressions {
         return add("(?:[\(sanitize(string.source))])")
     }
 
     // alias for anyOf
-    public func any(string: String) -> VerbalExpressions {
+    public func any(_ string: String) -> VerbalExpressions {
         return anyOf(string)
     }
 
-    public func any(string: VerbalExpressions) -> VerbalExpressions {
+    public func any(_ string: VerbalExpressions) -> VerbalExpressions {
         return anyOf(string.source)
     }
 
-    public func withAnyCase(enabled enabled: Bool = true) -> VerbalExpressions {
+    public func withAnyCase(enabled: Bool = true) -> VerbalExpressions {
         if enabled {
             return addModifier("i")
         }
@@ -149,7 +149,7 @@ public struct VerbalExpressions {
         }
     }
 
-    public func searchOneLine(enabled enabled: Bool = true) -> VerbalExpressions {
+    public func searchOneLine(enabled: Bool = true) -> VerbalExpressions {
         if enabled {
             return removeModifier("m")
         }
@@ -164,27 +164,27 @@ public struct VerbalExpressions {
     }
 
     public func endCapture() -> VerbalExpressions {
-        return set(suffixes: suffixes[suffixes.startIndex..<suffixes.endIndex.predecessor()])
+        return set(suffixes: suffixes[suffixes.startIndex..<suffixes.characters.index(before: suffixes.endIndex)])
             .add(")")
     }
 
-    public func replace(string: String, template: String) -> String {
+    public func replace(_ string: String, template: String) -> String {
         let range = NSRange(location: 0, length: string.utf16.count)
 
-        return regularExpression.stringByReplacingMatchesInString(string, options: [], range: range, withTemplate: template)
+        return regularExpression.stringByReplacingMatches(in: string, options: [], range: range, withTemplate: template)
     }
 
-    public func replace(string: String, with: String) -> String {
+    public func replace(_ string: String, with: String) -> String {
         let range = NSRange(location: 0, length: string.utf16.count)
-        let template = NSRegularExpression.escapedTemplateForString(with)
+        let template = NSRegularExpression.escapedTemplate(for: with)
 
-        return regularExpression.stringByReplacingMatchesInString(string, options: [], range: range, withTemplate: template)
+        return regularExpression.stringByReplacingMatches(in: string, options: [], range: range, withTemplate: template)
     }
 
-    public func test(string: String) -> Bool {
+    public func test(_ string: String) -> Bool {
         let range = NSRange(location: 0, length: string.utf16.count)
 
-        if let result = regularExpression.firstMatchInString(string, options: [], range: range) {
+        if let result = regularExpression.firstMatch(in: string, options: [], range: range) {
             return result.range.location != NSNotFound
         }
 
@@ -193,15 +193,15 @@ public struct VerbalExpressions {
 
     // internal methods
 
-    func sanitize(string: String) -> String {
-        return NSRegularExpression.escapedPatternForString(string)
+    func sanitize(_ string: String) -> String {
+        return NSRegularExpression.escapedPattern(for: string)
     }
 
-    func add(string: String) -> VerbalExpressions {
+    func add(_ string: String) -> VerbalExpressions {
         return set(source: source + string)
     }
 
-    func addModifier(modifier: Character) -> VerbalExpressions {
+    func addModifier(_ modifier: Character) -> VerbalExpressions {
         if let option = option(forModifier: modifier) {
             if( options.union(option) != options ){
                 return set(options: options.union(option))
@@ -210,37 +210,37 @@ public struct VerbalExpressions {
         return self
     }
 
-    func addModifier(modifier: NSRegularExpressionOptions) -> VerbalExpressions {
+    func addModifier(_ modifier: NSRegularExpression.Options) -> VerbalExpressions {
         if( options != options.union(modifier) ){
             return set(options: options.union(modifier))
         }
         return self
     }
 
-    func removeModifier(modifier: Character) -> VerbalExpressions {
-        if let option = option(forModifier: modifier) where options.contains(option) {
-            return set(options: options.subtract(option))
+    func removeModifier(_ modifier: Character) -> VerbalExpressions {
+        if let option = option(forModifier: modifier), options.contains(option) {
+            return set(options: options.subtracting(option))
         }
 
         return self
     }
 
-    func option(forModifier modifier: Character) -> NSRegularExpressionOptions? {
+    func option(forModifier modifier: Character) -> NSRegularExpression.Options? {
         switch modifier {
         case "d": // UREGEX_UNIX_LINES
-            return .UseUnixLineSeparators
+            return .useUnixLineSeparators
         case "i": // UREGEX_CASE_INSENSITIVE
-            return .CaseInsensitive
+            return .caseInsensitive
         case "x": // UREGEX_COMMENTS
-            return .AllowCommentsAndWhitespace
+            return .allowCommentsAndWhitespace
         case "m": // UREGEX_MULTILINE
-            return .AnchorsMatchLines
+            return .anchorsMatchLines
         case "s": // UREGEX_DOTALL
-            return .DotMatchesLineSeparators
+            return .dotMatchesLineSeparators
         case "u": // UREGEX_UWORD
-            return .UseUnicodeWordBoundaries
+            return .useUnicodeWordBoundaries
         case "U": // UREGEX_LITERAL
-            return .IgnoreMetacharacters
+            return .ignoreMetacharacters
         default:
             fatalError("Unknown modifier")
         }
