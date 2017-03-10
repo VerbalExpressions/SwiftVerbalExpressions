@@ -254,8 +254,8 @@ extension VerbalExpressions: CustomStringConvertible {
 
 // Match operators
 // Adapted from https://gist.github.com/JimRoepcke/d68dd41ee2fedc6a0c67
-infix operator =~  { associativity left precedence 140 }
-infix operator !~ { associativity left precedence 140 }
+infix operator =~ : ComparisonPrecedence
+infix operator !~ : ComparisonPrecedence
 
 public func =~(lhs: String, rhs: VerbalExpressions) -> Bool {
     return rhs.test(lhs)
