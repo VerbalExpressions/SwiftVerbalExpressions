@@ -252,6 +252,23 @@ extension VerbalExpressions: CustomStringConvertible {
     public var description: String { return pattern }
 }
 
+//Return found substrings
+extension VerbalExpressions {
+    func resultsFromString(string: String) -> [String] {
+        let range = NSRange(location: 0, length: string.utf16.count)
+        let results = regularExpression.matchesInString(string, options: [], range: range)
+        var strings: [String] = []
+        for result in results {
+            guard result.range.location != NSNotFound else { continue }
+            autoreleasepool {
+                let string = (string as NSString).substringWithRange(result.range)
+                strings.append(string)
+            }
+        }
+        return strings
+    }
+}
+
 // Match operators
 // Adapted from https://gist.github.com/JimRoepcke/d68dd41ee2fedc6a0c67
 infix operator =~  { associativity left precedence 140 }
