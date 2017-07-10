@@ -185,7 +185,7 @@ class VerbalExpressionsTests: XCTestCase {
     }
     
     func testSearchOneLine() {
-        let tester = VerEx()
+        var tester = VerEx()
             .startOfLine()
             .then("a")
             .br()
@@ -194,7 +194,7 @@ class VerbalExpressionsTests: XCTestCase {
         
         XCTAssert(tester.test("a\nb"), "b is on the second line")
         
-        tester.searchOneLine()
+        tester = tester.searchOneLine()
         XCTAssert(tester.test("a\nb"), "b is on the second line but we are only searching the first")
     }
     

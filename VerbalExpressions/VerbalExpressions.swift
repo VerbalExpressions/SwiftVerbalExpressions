@@ -14,41 +14,45 @@ public func VerEx() -> VerbalExpressions {
 
 public struct VerbalExpressions {
     // stored properties
-    var prefixes = ""
-    var source = ""
-    var suffixes = ""
-    var options: NSRegularExpression.Options = .anchorsMatchLines
+    fileprivate let prefixes: String
+    fileprivate let source: String
+    fileprivate let suffixes: String
+    fileprivate let options: NSRegularExpression.Options
 
     // computed properties
-    var pattern: String { return prefixes + source + suffixes }
+    public var pattern: String { return prefixes + source + suffixes }
 
-    var regularExpression: NSRegularExpression! {
+    public var regularExpression: NSRegularExpression! {
         return try! NSRegularExpression(pattern: pattern, options: options)
     }
     
-    func set(prefixes: String? = nil, source: String? = nil, suffixes: String? = nil, options: NSRegularExpression.Options? = nil) -> VerbalExpressions {
-        return VerbalExpressions(
-            prefixes: prefixes ?? self.prefixes,
-            source: source ?? self.source,
-            suffixes: suffixes ?? self.suffixes,
-            options: options ?? self.options
-        )
+    // initializers
+    public init() {
+        self.init(prefixes: "", source: "", suffixes: "", options: .anchorsMatchLines)
     }
-
+    
+    fileprivate init(prefixes: String, source: String, suffixes: String, options: NSRegularExpression.Options) {
+        self.prefixes = prefixes
+        self.source = source
+        self.suffixes = suffixes
+        self.options = options
+    }
+    
     // instance methods
     public func startOfLine(enabled: Bool = true) -> VerbalExpressions {
-        return set(prefixes: enabled ? "^" : "")
+        return setting(prefixes: enabled ? "^" : "")
     }
 
     public func endOfLine(enabled: Bool = true) -> VerbalExpressions {
-        return set(suffixes: enabled ? "$" : "")    }
-
-    public func then(_ string: String) -> VerbalExpressions {
-        return add("(?:\(sanitize(string)))")
+        return setting(suffixes: enabled ? "$" : "")
     }
 
-    public func then(_ string: VerbalExpressions) -> VerbalExpressions {
-        return add("(?:\(sanitize(string.source)))")
+    public func then(_ string: String) -> VerbalExpressions {
+        return adding("(?:\(string.sanitized))")
+    }
+
+    public func then(_ exp: VerbalExpressions) -> VerbalExpressions {
+        return then(exp.source)
     }
 
     // alias for then
@@ -56,58 +60,57 @@ public struct VerbalExpressions {
         return then(string)
     }
 
-    public func find(_ string: VerbalExpressions) -> VerbalExpressions {
-        return then(string)
+    public func find(_ exp: VerbalExpressions) -> VerbalExpressions {
+        return find(exp.source)
     }
 
     public func maybe(_ string: String) -> VerbalExpressions {
-        return add("(?:\(sanitize(string)))?")
+        return adding("(?:\(string.sanitized))?")
     }
 
-    public func maybe(_ string: VerbalExpressions) -> VerbalExpressions {
-        return add("(?:\(sanitize(string.source)))?")
+    public func maybe(_ exp: VerbalExpressions) -> VerbalExpressions {
+        return maybe(exp.source)
     }
 
     public func or() -> VerbalExpressions {
-        return set(prefixes: prefixes + "(?:")
-            .set(suffixes: ")" + suffixes)
-            .add(")|(?:")
+        return setting(prefixes: prefixes + "(?:", suffixes: ")" + suffixes)
+            .adding(")|(?:")
     }
 
-    public func or(_ value: String) -> VerbalExpressions {
-        return or().then(value)
+    public func or(_ string: String) -> VerbalExpressions {
+        return or().then(string)
     }
 
-    public func or(_ value: VerbalExpressions) -> VerbalExpressions {
-        return or(value.source);
+    public func or(_ exp: VerbalExpressions) -> VerbalExpressions {
+        return or(exp.source);
     }
 
     public func anything() -> VerbalExpressions {
-        return add("(?:.*)")
+        return adding("(?:.*)")
     }
 
     public func anythingBut(_ string: String) -> VerbalExpressions {
-        return add("(?:[^\(sanitize(string))]*)")
+        return adding("(?:[^\(string.sanitized)]*)")
     }
 
-    public func anythingBut(_ string: VerbalExpressions) -> VerbalExpressions {
-        return add("(?:[^\(sanitize(string.source))]*)")
+    public func anythingBut(_ exp: VerbalExpressions) -> VerbalExpressions {
+        return anythingBut(exp.source)
     }
 
     public func something() -> VerbalExpressions {
-        return add("(?:.+)")
+        return adding("(?:.+)")
     }
 
     public func somethingBut(_ string: String) -> VerbalExpressions {
-        return add("(?:[^\(sanitize(string))]+)")
+        return adding("(?:[^\(string.sanitized)]+)")
     }
 
-    public func somethingBut(_ string: VerbalExpressions) -> VerbalExpressions {
-        return add("(?:[^\(sanitize(string.source))]+)")
+    public func somethingBut(_ exp: VerbalExpressions) -> VerbalExpressions {
+        return somethingBut(exp.source)
     }
 
     public func lineBreak() -> VerbalExpressions {
-        return add("(?:(?:\n)|(?:\r\n))")
+        return adding("(?:(?:\n)|(?:\r\n))")
     }
 
     // alias for lineBreak
@@ -116,19 +119,19 @@ public struct VerbalExpressions {
     }
 
     public func tab() -> VerbalExpressions {
-        return add("\t")
+        return adding("\t")
     }
 
     public func word() -> VerbalExpressions {
-        return add("\\w+")
+        return adding("\\w+")
     }
 
     public func anyOf(_ string: String) -> VerbalExpressions {
-        return add("(?:[\(sanitize(string))])")
+        return adding("(?:[\(string.sanitized)])")
     }
 
-    public func anyOf(_ string: VerbalExpressions) -> VerbalExpressions {
-        return add("(?:[\(sanitize(string.source))])")
+    public func anyOf(_ exp: VerbalExpressions) -> VerbalExpressions {
+        return anyOf(exp.source)
     }
 
     // alias for anyOf
@@ -136,36 +139,36 @@ public struct VerbalExpressions {
         return anyOf(string)
     }
 
-    public func any(_ string: VerbalExpressions) -> VerbalExpressions {
-        return anyOf(string.source)
+    public func any(_ exp: VerbalExpressions) -> VerbalExpressions {
+        return anyOf(exp.source)
     }
 
     public func withAnyCase(enabled: Bool = true) -> VerbalExpressions {
         if enabled {
-            return addModifier("i")
+            return adding(modifier: "i")
         }
         else {
-            return removeModifier("i")
+            return removing(modifier: "i")
         }
     }
 
     public func searchOneLine(enabled: Bool = true) -> VerbalExpressions {
         if enabled {
-            return removeModifier("m")
+            return removing(modifier: "m")
         }
         else {
-            return addModifier("m")
+            return adding(modifier: "m")
         }
     }
 
     public func beginCapture() -> VerbalExpressions {
-        return set(suffixes: suffixes + ")")
-            .add("(")
+        return setting(suffixes: suffixes + ")")
+            .adding("(")
     }
 
     public func endCapture() -> VerbalExpressions {
-        return set(suffixes: suffixes[suffixes.startIndex..<suffixes.characters.index(before: suffixes.endIndex)])
-            .add(")")
+        return setting(suffixes: suffixes.substring(to: suffixes.endIndex))
+            .adding(")")
     }
 
     public func replace(_ string: String, template: String) -> String {
@@ -191,71 +194,87 @@ public struct VerbalExpressions {
         return false
     }
 
-    // internal methods
+}
 
-    func sanitize(_ string: String) -> String {
-        return NSRegularExpression.escapedPattern(for: string)
-    }
-
-    func add(_ string: String) -> VerbalExpressions {
-        return set(source: source + string)
-    }
-
-    func addModifier(_ modifier: Character) -> VerbalExpressions {
-        if let option = option(forModifier: modifier) {
-            if( options.union(option) != options ){
-                return set(options: options.union(option))
-            }
+fileprivate extension VerbalExpressions {
+    func setting(prefixes: String? = nil, source: String? = nil, suffixes: String? = nil, options: NSRegularExpression.Options? = nil) -> VerbalExpressions {
+        guard prefixes != self.prefixes || source != self.source || suffixes != self.suffixes || options != self.options else {
+            return self
         }
-        return self
+        
+        return VerbalExpressions(
+            prefixes: prefixes ?? self.prefixes,
+            source: source ?? self.source,
+            suffixes: suffixes ?? self.suffixes,
+            options: options ?? self.options
+        )
+    }
+    
+    func adding(_ string: String) -> VerbalExpressions {
+        return setting(source: source + string)
     }
 
-    func addModifier(_ modifier: NSRegularExpression.Options) -> VerbalExpressions {
-        if( options != options.union(modifier) ){
-            return set(options: options.union(modifier))
-        }
-        return self
+    func adding(modifier: Character) -> VerbalExpressions {
+        return adding(options: NSRegularExpression.Options(modifier: modifier))
     }
 
-    func removeModifier(_ modifier: Character) -> VerbalExpressions {
-        if let option = option(forModifier: modifier), options.contains(option) {
-            return set(options: options.subtracting(option))
-        }
-
-        return self
+    func adding(options: NSRegularExpression.Options) -> VerbalExpressions {
+        return setting(options: self.options.union(options))
     }
 
-    func option(forModifier modifier: Character) -> NSRegularExpression.Options? {
+    func removing(modifier: Character) -> VerbalExpressions {
+        let removedOptions = NSRegularExpression.Options(modifier: modifier)
+        let newOptions = options.subtracting(removedOptions)
+        return setting(options: newOptions)
+    }
+}
+
+// MARK: - CustomStringConvertible, CustomDebugStringConvertible conformance
+extension VerbalExpressions: CustomStringConvertible, CustomDebugStringConvertible {
+    public var description: String { return pattern }
+    public var debugDescription: String { return pattern }
+}
+
+// MARK: - Equatable conformance
+extension VerbalExpressions: Equatable {
+    public static func ==(lhs: VerbalExpressions, rhs: VerbalExpressions) -> Bool {
+        return lhs.pattern == rhs.pattern && lhs.options == rhs.options
+    }
+}
+
+fileprivate extension String {
+    var sanitized: String {
+        return NSRegularExpression.escapedPattern(for: self)
+    }
+}
+
+fileprivate extension NSRegularExpression.Options {
+    init(modifier: Character) {
         switch modifier {
         case "d": // UREGEX_UNIX_LINES
-            return .useUnixLineSeparators
+            self = .useUnixLineSeparators
         case "i": // UREGEX_CASE_INSENSITIVE
-            return .caseInsensitive
+            self = .caseInsensitive
         case "x": // UREGEX_COMMENTS
-            return .allowCommentsAndWhitespace
+            self = .allowCommentsAndWhitespace
         case "m": // UREGEX_MULTILINE
-            return .anchorsMatchLines
+            self = .anchorsMatchLines
         case "s": // UREGEX_DOTALL
-            return .dotMatchesLineSeparators
+            self = .dotMatchesLineSeparators
         case "u": // UREGEX_UWORD
-            return .useUnicodeWordBoundaries
+            self = .useUnicodeWordBoundaries
         case "U": // UREGEX_LITERAL
-            return .ignoreMetacharacters
+            self = .ignoreMetacharacters
         default:
-            fatalError("Unknown modifier")
+            self = []
         }
     }
-
 }
 
-extension VerbalExpressions: CustomStringConvertible {
-    public var description: String { return pattern }
-}
-
-// Match operators
+// MARK: - Operators
 // Adapted from https://gist.github.com/JimRoepcke/d68dd41ee2fedc6a0c67
-infix operator =~ : ComparisonPrecedence
-infix operator !~ : ComparisonPrecedence
+infix operator =~: ComparisonPrecedence
+infix operator !~: ComparisonPrecedence
 
 public func =~(lhs: String, rhs: VerbalExpressions) -> Bool {
     return rhs.test(lhs)
@@ -272,3 +291,4 @@ public func !~(lhs: String, rhs: VerbalExpressions) -> Bool {
 public func !~(lhs: VerbalExpressions, rhs: String) -> Bool {
     return !(lhs =~ rhs)
 }
+
