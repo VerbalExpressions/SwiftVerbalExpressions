@@ -85,7 +85,7 @@ public struct VerbalExpressions {
         return or(exp.source);
     }
 
-    public func anything() -> VerbalExpressions {
+    public func anything() -> VerbalExpressions {   
         return adding("(?:.*)")
     }
 

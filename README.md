@@ -31,21 +31,21 @@ let testMe = "https://www.google.com"
 
 // Use test() method
 if tester.test(testMe) {
-    println("We have a correct URL") // This output will fire
+    print("We have a correct URL") // This output will fire
 }
 else {
-    println("The URL is incorrect")
+    print("The URL is incorrect")
 }
 
 // Use =~ operator
 if testMe =~ tester {
-    println("We have a correct URL") // This output will fire
+    print("We have a correct URL") // This output will fire
 }
 else {
-    println("The URL is incorrect")
+    print("The URL is incorrect")
 }
 
-println(tester) // Outputs the actual expression used: "^(?:http)(?:s)?(?::\/\/)(?:www)?(?:[^ ]*)$"
+prin(tester) // Outputs the actual expression used: "^(?:http)(?:s)?(?::\/\/)(?:www)?(?:[^ ]*)$"
 ```
 
 ### Replacing strings
@@ -59,7 +59,7 @@ let verEx = VerEx().find("bird")
 // Execute the expression like a normal RegExp object
 let result = verEx.replace(replaceMe, with: "duck")
 
-println(result) // Outputs "Replace duck with a duck"
+print(result) // Outputs "Replace duck with a duck"
 ```
 
 ### Shorthand for string replace:
@@ -67,7 +67,7 @@ println(result) // Outputs "Replace duck with a duck"
 ```swift
 let result2 = VerEx().find("red").replace("We have a red house", with: "blue")
 
-println(result2) // Outputs "We have a blue house"
+print(result2) // Outputs "We have a blue house"
 ```
 
 
@@ -91,3 +91,23 @@ Thank you to @kishikawakatsumi for ObjectiveCVerbalExpressions from which I borr
 ## Other implementations
 
 You can view all implementations on [VerbalExpressions.github.io](http://VerbalExpressions.github.io)
+
+
+## Installation and use
+
+This version is under testing, but it supports Swift Package Manager. Therefor it can be included in the project with:
+
+```
+        .package(
+            url: "https://github.com/lf-araujo/SwiftVerEx.git",
+            from: "
+
+```
+
+And:
+
+```
+        .target(
+            name: "YourProject",
+            dependencies: ["VerbalExpressions"]),
+```
