@@ -95,11 +95,11 @@ You can view all implementations on [VerbalExpressions.github.io](http://VerbalE
 
 ## Installation and use
 
-This version is under testing, but it supports Swift Package Manager. Therefor it can be included in the project with:
+This version is under testing, but it supports Swift Package Manager. Therefore it can be included in the project with:
 
 ```
         .package(
-            url: "https://github.com/lf-araujo/SwiftVerEx.git",
+            url: "https://github.com/VerbalExpressions/SwiftVerbalExpressions.git",
             from: "
 
 ```
